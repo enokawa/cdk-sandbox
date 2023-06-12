@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as dynamodb from '@aws-cdk/aws-dynamodb'
+import * as iam from '@aws-cdk/aws-iam';
 
 export interface HitCounterProps {
   downstream: lambda.IFunction;
@@ -25,5 +26,24 @@ export class HitCounter extends cdk.Construct {
         HITS_TABLE_NAME: table.tableName
       }
     });
+
+    const updateItemStatement: iam.PolicyStatement = new iam.PolicyStatement ({
+      actions: ['dynamodb:UpdateItem'],
+      effect: iam.Effect.ALLOW,
+      resources: [
+        table.tableArn,
+      ]
+    });
+
+    const invokeFuncitionStatement: iam.PolicyStatement = new iam.PolicyStatement ({
+      actions: ['lambda:*'],
+      effect: iam.Effect.ALLOW,
+      resources: [
+        props.downstream.functionArn,
+      ]
+    });
+
+    this.handler.addToRolePolicy(updateItemStatement);
+    this.handler.addToRolePolicy(invokeFuncitionStatement);
   }
 }
