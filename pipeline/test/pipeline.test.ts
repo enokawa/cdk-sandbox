@@ -1,17 +1,27 @@
-// import * as cdk from 'aws-cdk-lib';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as Pipeline from '../lib/pipeline-stack';
+import * as cdk from 'aws-cdk-lib';
+import { Template } from 'aws-cdk-lib/assertions';
+import * as Pipeline from '../lib/pipeline-stack';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/pipeline-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new Pipeline.PipelineStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+test('S3 Bucket Created', () => {
+  const app = new cdk.App();
+  const stack = new Pipeline.PipelineStack(app, 'MyTestStack');
+  const template = Template.fromStack(stack);
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+  template.hasResourceProperties('AWS::S3::Bucket', {
+    BucketName: 'dev-pipeline-artifact',
+    BucketEncryption: {
+      ServerSideEncryptionConfiguration :[{
+        ServerSideEncryptionByDefault: {
+            SSEAlgorithm: 'AES256'
+        }
+      }]
+    },
+    VersioningConfiguration: { Status: 'Enabled' },
+    PublicAccessBlockConfiguration: {
+      BlockPublicAcls: true,
+      BlockPublicPolicy: true,
+      IgnorePublicAcls: true,
+      RestrictPublicBuckets: true
+    }
+  });
 });
