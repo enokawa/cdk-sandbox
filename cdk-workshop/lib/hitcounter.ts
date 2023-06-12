@@ -9,6 +9,7 @@ export interface HitCounterProps {
 
 export class HitCounter extends cdk.Construct {
   public readonly handler: lambda.Function;
+  public readonly table: dynamodb.Table;
 
   constructor(scope: cdk.Construct, id: string, props: HitCounterProps) {
     super(scope, id);
@@ -26,6 +27,7 @@ export class HitCounter extends cdk.Construct {
         HITS_TABLE_NAME: table.tableName
       }
     });
+    this.table = table;
 
     const updateItemStatement: iam.PolicyStatement = new iam.PolicyStatement ({
       actions: ['dynamodb:UpdateItem'],
