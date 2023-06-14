@@ -34,5 +34,13 @@ export class PipelineStack extends cdk.Stack {
     });
 
     bucket.addToResourcePolicy(bucketPolicy);
+
+    const pipelineRole = new iam.Role(this, 'PipelineRole', {
+      roleName: 'dev-enokawa-pipeline-role',
+      description: 'dev-enokawa-pipeline-role',
+      assumedBy: new iam.ServicePrincipal('codepipeline.amazonaws.com')
+    });
+
+    pipelineRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'))
   }
 }
