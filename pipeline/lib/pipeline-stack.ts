@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as codestar from 'aws-cdk-lib/aws-codestarconnections';
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -66,6 +67,11 @@ export class PipelineStack extends cdk.Stack {
     const buildLogGroup = new logs.LogGroup(this, 'BuildLogGroup', {
       logGroupName: '/aws/codebuild/dev-enokawa-build',
       retention: logs.RetentionDays.THREE_MONTHS
+    });
+
+    const githubConnection = new codestar.CfnConnection(this, 'CodeStarConnection', {
+      connectionName: 'dev-enokawa-github-connection',
+      providerType: 'GitHub'
     });
   }
 }
