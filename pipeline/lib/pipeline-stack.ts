@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -61,5 +62,10 @@ export class PipelineStack extends cdk.Stack {
 
     // TODO: Set with minimum privileges
     deployRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
+
+    const buildLogGroup = new logs.LogGroup(this, 'BuildLogGroup', {
+      logGroupName: '/aws/codebuild/dev-enokawa-build',
+      retention: logs.RetentionDays.THREE_MONTHS
+    });
   }
 }
