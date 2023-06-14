@@ -41,6 +41,7 @@ export class PipelineStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('codepipeline.amazonaws.com')
     });
 
+    // TODO: Set with minimum privileges
     pipelineRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'))
 
     const buildRole = new iam.Role(this, 'BuildRole', {
@@ -49,6 +50,16 @@ export class PipelineStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com')
     });
 
+    // TODO: Set with minimum privileges
     buildRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'))
+
+    const deployRole = new iam.Role(this, 'deployRole', {
+      roleName: 'dev-enokawa-deploy-role',
+      description: 'dev-enokawa-deploy-role',
+      assumedBy: new iam.ServicePrincipal('cloudformation.amazonaws.com')
+    });
+
+    // TODO: Set with minimum privileges
+    deployRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'))
   }
 }
