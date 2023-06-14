@@ -42,5 +42,13 @@ export class PipelineStack extends cdk.Stack {
     });
 
     pipelineRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'))
+
+    const buildRole = new iam.Role(this, 'BuildRole', {
+      roleName: 'dev-enokawa-build-role',
+      description: 'dev-enokawa-build-role',
+      assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com')
+    });
+
+    buildRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'))
   }
 }
