@@ -8,7 +8,7 @@ test('S3 Bucket Created', () => {
   const template = Template.fromStack(stack);
 
   template.hasResourceProperties('AWS::S3::Bucket', {
-    BucketName: 'dev-pipeline-artifact',
+    BucketName: 'dev-enokawa-pipeline-artifact',
     BucketEncryption: {
       ServerSideEncryptionConfiguration :[{
         ServerSideEncryptionByDefault: {

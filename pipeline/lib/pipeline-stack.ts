@@ -7,7 +7,7 @@ export class PipelineStack extends cdk.Stack {
     super(scope, id, props);
 
     const bucket = new s3.Bucket(this, 'PipelineArtifact', {
-      bucketName: 'dev-pipeline-artifact',
+      bucketName: 'dev-enokawa-pipeline-artifact',
       encryption: s3.BucketEncryption.S3_MANAGED,
       versioned: true,
       blockPublicAccess: new s3.BlockPublicAccess({
