@@ -4,6 +4,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as codestar from 'aws-cdk-lib/aws-codestarconnections';
+import * as build from 'aws-cdk-lib/aws-codebuild';
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -72,6 +73,27 @@ export class PipelineStack extends cdk.Stack {
     const githubConnection = new codestar.CfnConnection(this, 'CodeStarConnection', {
       connectionName: 'dev-enokawa-github-connection',
       providerType: 'GitHub'
+    });
+
+    const buildProject = new build.PipelineProject(this, 'BuildProject', {
+      projectName: 'dev-enokawa-build',
+      logging: {
+        cloudWatch: {
+          logGroup: buildLogGroup,
+          enabled: true
+        }
+      },
+      role: buildRole,
+      environment: {
+        computeType: build.ComputeType.SMALL,
+        buildImage: build.LinuxBuildImage.STANDARD_4_0,
+        privileged: false,
+        environmentVariables: {
+          ENV: { value: 'dev' },
+          BUILD_ARTIFACT_BUCKET: { value: bucket.bucketName }
+        }
+      },
+      cache: build.Cache.bucket(bucket)
     });
   }
 }
