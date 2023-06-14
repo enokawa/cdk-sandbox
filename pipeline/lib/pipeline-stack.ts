@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -17,5 +18,21 @@ export class PipelineStack extends cdk.Stack {
         restrictPublicBuckets: true,
       })
     });
+
+    const bucketPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.DENY,
+      actions: ['s3:*'],
+      principals: [new iam.StarPrincipal()],
+      resources: [
+        bucket.bucketArn + '/*'
+      ],
+      conditions: {
+        'Bool': {
+          'aws:SecureTransport': false
+        }
+      }
+    });
+
+    bucket.addToResourcePolicy(bucketPolicy);
   }
 }
