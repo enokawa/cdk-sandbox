@@ -125,6 +125,19 @@ export class PipelineStack extends cdk.Stack {
       runOrder: 1,
     });
 
+    const deployActionForCreateChangeSet = new actions.CloudFormationCreateReplaceChangeSetAction({
+      actionName: 'CreateChangeSet',
+      stackName: 'dev-enokawa-stack',
+      changeSetName: 'dev-enokawa-stack-changeset',
+      templatePath: buildArtifact.atPath('packaged.yaml'),
+      deploymentRole: deployRole,
+      adminPermissions: true,
+      parameterOverrides: {
+        'ENV': 'dev',
+      },
+      runOrder: 1
+    });
+
     pipeline.addStage({
       stageName: 'Source',
       actions: [sourceAction]
@@ -134,5 +147,10 @@ export class PipelineStack extends cdk.Stack {
       stageName: 'Build',
       actions: [buildAction]
     });
+
+    pipeline.addStage({
+      stageName: 'Deploy',
+      actions: [deployActionForCreateChangeSet]
+    })
   }
 }
