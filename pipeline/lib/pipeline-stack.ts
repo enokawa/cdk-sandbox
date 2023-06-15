@@ -12,8 +12,12 @@ export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const env = this.node.getContext('env');
+    const project = this.node.getContext('project');
+    const repo = this.node.getContext('repo');
+
     const bucket = new s3.Bucket(this, 'PipelineArtifact', {
-      bucketName: 'dev-enokawa-pipeline-artifact',
+      bucketName: `${env}-${project}-pipeline-artifact`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       versioned: true,
       blockPublicAccess: new s3.BlockPublicAccess({
@@ -41,8 +45,8 @@ export class PipelineStack extends cdk.Stack {
     bucket.addToResourcePolicy(bucketPolicy);
 
     const pipelineRole = new iam.Role(this, 'PipelineRole', {
-      roleName: 'dev-enokawa-pipeline-role',
-      description: 'dev-enokawa-pipeline-role',
+      roleName: `${env}-${project}-pipeline-role`,
+      description: `${env}-${project}-pipeline-role`,
       assumedBy: new iam.ServicePrincipal('codepipeline.amazonaws.com')
     });
 
@@ -50,8 +54,8 @@ export class PipelineStack extends cdk.Stack {
     pipelineRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
 
     const buildRole = new iam.Role(this, 'BuildRole', {
-      roleName: 'dev-enokawa-build-role',
-      description: 'dev-enokawa-build-role',
+      roleName: `${env}-${project}-build-role`,
+      description: `${env}-${project}-build-role`,
       assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com')
     });
 
@@ -59,8 +63,8 @@ export class PipelineStack extends cdk.Stack {
     buildRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
 
     const deployRole = new iam.Role(this, 'deployRole', {
-      roleName: 'dev-enokawa-deploy-role',
-      description: 'dev-enokawa-deploy-role',
+      roleName: `${env}-${project}-deploy-role`,
+      description: `${env}-${project}-deploy-role`,
       assumedBy: new iam.ServicePrincipal('cloudformation.amazonaws.com')
     });
 
@@ -68,17 +72,17 @@ export class PipelineStack extends cdk.Stack {
     deployRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
 
     const buildLogGroup = new logs.LogGroup(this, 'BuildLogGroup', {
-      logGroupName: '/aws/codebuild/dev-enokawa-build',
+      logGroupName: `/aws/codebuild/${env}-${project}-build`,
       retention: logs.RetentionDays.THREE_MONTHS
     });
 
     const githubConnection = new codestar.CfnConnection(this, 'CodeStarConnection', {
-      connectionName: 'dev-enokawa-github-connection',
+      connectionName: `${env}-${project}-github-connection`,
       providerType: 'GitHub'
     });
 
     const buildProject = new build.PipelineProject(this, 'BuildProject', {
-      projectName: 'dev-enokawa-build',
+      projectName: `${env}-${project}-build`,
       logging: {
         cloudWatch: {
           logGroup: buildLogGroup,
@@ -91,7 +95,7 @@ export class PipelineStack extends cdk.Stack {
         buildImage: build.LinuxBuildImage.STANDARD_4_0,
         privileged: false,
         environmentVariables: {
-          ENV: { value: 'dev' },
+          ENV: { value: env },
           BUILD_ARTIFACT_BUCKET: { value: bucket.bucketName }
         }
       },
@@ -102,7 +106,7 @@ export class PipelineStack extends cdk.Stack {
     const buildArtifact = new codepipeline.Artifact('BuildArtifact');
 
     const pipeline = new codepipeline.Pipeline(this, 'Pipeline', {
-      pipelineName: 'dev-enokawa-pipeline',
+      pipelineName: `${env}-${project}-pipeline`,
       role: pipelineRole,
       artifactBucket: bucket,
     });
@@ -111,9 +115,9 @@ export class PipelineStack extends cdk.Stack {
       actionName: 'Source',
       output: sourceArtifact,
       connectionArn: githubConnection.attrConnectionArn,
-      owner: 'enokawa',
-      repo: 'cdk-sandbox',
-      branch: 'main',
+      owner: repo.owner,
+      repo: repo.repo,
+      branch: repo.branch,
       runOrder: 1,
     });
 
@@ -127,21 +131,21 @@ export class PipelineStack extends cdk.Stack {
 
     const deployActionForCreateChangeSet = new actions.CloudFormationCreateReplaceChangeSetAction({
       actionName: 'CreateChangeSet',
-      stackName: 'dev-enokawa-stack',
-      changeSetName: 'dev-enokawa-stack-changeset',
+      stackName: `${env}-${project}-stack`,
+      changeSetName: `${env}-${project}-stack-changeset`,
       templatePath: buildArtifact.atPath('packaged.yaml'),
       deploymentRole: deployRole,
       adminPermissions: true,
       parameterOverrides: {
-        'ENV': 'dev',
+        'ENV': env,
       },
       runOrder: 1
     });
 
     const deployActionForExecuteChangeSet = new actions.CloudFormationExecuteChangeSetAction({
       actionName: 'ExecuteChangeSet',
-      stackName: 'dev-enokawa-stack',
-      changeSetName: 'dev-enokawa-stack-changeset',
+      stackName: `${env}-${project}-stack`,
+      changeSetName: `${env}-${project}-stack-changeset`,
       runOrder: 2,
     })
 
