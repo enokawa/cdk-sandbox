@@ -123,7 +123,7 @@ export class PipelineStack extends cdk.Stack {
       outputs: [buildArtifact],
       project: buildProject,
       runOrder: 1,
-    })
+    });
 
     pipeline.addStage({
       stageName: 'Source',
@@ -133,6 +133,6 @@ export class PipelineStack extends cdk.Stack {
     pipeline.addStage({
       stageName: 'Build',
       actions: [buildAction]
-    })
+    });
   }
 }
