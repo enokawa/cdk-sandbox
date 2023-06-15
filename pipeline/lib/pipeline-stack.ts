@@ -5,6 +5,8 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as codestar from 'aws-cdk-lib/aws-codestarconnections';
 import * as build from 'aws-cdk-lib/aws-codebuild';
+import * as actions from 'aws-cdk-lib/aws-codepipeline-actions';
+import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -95,5 +97,42 @@ export class PipelineStack extends cdk.Stack {
       },
       cache: build.Cache.bucket(bucket)
     });
+
+    const sourceArtifact = new codepipeline.Artifact('SourceArtifact');
+    const buildArtifact = new codepipeline.Artifact('BuildArtifact');
+
+    const pipeline = new codepipeline.Pipeline(this, 'Pipeline', {
+      pipelineName: 'dev-enokawa-pipeline',
+      role: pipelineRole,
+      artifactBucket: bucket,
+    });
+
+    const sourceAction = new actions.CodeStarConnectionsSourceAction({
+      actionName: 'Source',
+      output: sourceArtifact,
+      connectionArn: githubConnection.attrConnectionArn,
+      owner: 'enokawa',
+      repo: 'cdk-sandbox',
+      branch: 'main',
+      runOrder: 1,
+    });
+
+    const buildAction = new actions.CodeBuildAction({
+      actionName: 'Build',
+      input: sourceArtifact,
+      outputs: [buildArtifact],
+      project: buildProject,
+      runOrder: 1,
+    })
+
+    pipeline.addStage({
+      stageName: 'Source',
+      actions: [sourceAction]
+    });
+
+    pipeline.addStage({
+      stageName: 'Build',
+      actions: [buildAction]
+    })
   }
 }
