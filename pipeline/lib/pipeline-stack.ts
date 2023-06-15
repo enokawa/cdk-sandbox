@@ -138,6 +138,13 @@ export class PipelineStack extends cdk.Stack {
       runOrder: 1
     });
 
+    const deployActionForExecuteChangeSet = new actions.CloudFormationExecuteChangeSetAction({
+      actionName: 'ExecuteChangeSet',
+      stackName: 'dev-enokawa-stack',
+      changeSetName: 'dev-enokawa-stack-changeset',
+      runOrder: 2,
+    })
+
     pipeline.addStage({
       stageName: 'Source',
       actions: [sourceAction]
@@ -150,7 +157,7 @@ export class PipelineStack extends cdk.Stack {
 
     pipeline.addStage({
       stageName: 'Deploy',
-      actions: [deployActionForCreateChangeSet]
+      actions: [deployActionForCreateChangeSet, deployActionForExecuteChangeSet]
     })
   }
 }
