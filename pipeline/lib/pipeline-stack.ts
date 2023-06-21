@@ -117,7 +117,7 @@ export class PipelineStack extends cdk.Stack {
       stackName: `${env}-${project}-stack`,
       changeSetName: `${env}-${project}-stack-changeset`,
       runOrder: 2,
-    })
+    });
 
     pipeline.addStage({
       stageName: 'Source',
@@ -132,6 +132,6 @@ export class PipelineStack extends cdk.Stack {
     pipeline.addStage({
       stageName: 'Deploy',
       actions: [deployActionForCreateChangeSet, deployActionForExecuteChangeSet]
-    })
+    });
   }
 }
