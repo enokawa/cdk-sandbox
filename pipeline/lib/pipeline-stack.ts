@@ -50,26 +50,17 @@ export class PipelineStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('codepipeline.amazonaws.com')
     });
 
-    // TODO: Set with minimum privileges
-    pipelineRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
-
     const buildRole = new iam.Role(this, 'BuildRole', {
       roleName: `${env}-${project}-build-role`,
       description: `${env}-${project}-build-role`,
       assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com')
     });
 
-    // TODO: Set with minimum privileges
-    buildRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
-
     const deployRole = new iam.Role(this, 'deployRole', {
       roleName: `${env}-${project}-deploy-role`,
       description: `${env}-${project}-deploy-role`,
       assumedBy: new iam.ServicePrincipal('cloudformation.amazonaws.com')
     });
-
-    // TODO: Set with minimum privileges
-    deployRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess'));
 
     const buildLogGroup = new logs.LogGroup(this, 'BuildLogGroup', {
       logGroupName: `/aws/codebuild/${env}-${project}-build`,
