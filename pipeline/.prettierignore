@@ -1,0 +1,5 @@
+*.js
+*.md
+*.json
+cdk.out/
+test/*.js
