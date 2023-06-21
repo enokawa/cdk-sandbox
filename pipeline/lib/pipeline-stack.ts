@@ -44,24 +44,6 @@ export class PipelineStack extends cdk.Stack {
 
     bucket.addToResourcePolicy(bucketPolicy);
 
-    const pipelineRole = new iam.Role(this, 'PipelineRole', {
-      roleName: `${env}-${project}-pipeline-role`,
-      description: `${env}-${project}-pipeline-role`,
-      assumedBy: new iam.ServicePrincipal('codepipeline.amazonaws.com')
-    });
-
-    const buildRole = new iam.Role(this, 'BuildRole', {
-      roleName: `${env}-${project}-build-role`,
-      description: `${env}-${project}-build-role`,
-      assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com')
-    });
-
-    const deployRole = new iam.Role(this, 'deployRole', {
-      roleName: `${env}-${project}-deploy-role`,
-      description: `${env}-${project}-deploy-role`,
-      assumedBy: new iam.ServicePrincipal('cloudformation.amazonaws.com')
-    });
-
     const buildLogGroup = new logs.LogGroup(this, 'BuildLogGroup', {
       logGroupName: `/aws/codebuild/${env}-${project}-build`,
       retention: logs.RetentionDays.THREE_MONTHS
@@ -80,7 +62,6 @@ export class PipelineStack extends cdk.Stack {
           enabled: true
         }
       },
-      role: buildRole,
       environment: {
         computeType: build.ComputeType.SMALL,
         buildImage: build.LinuxBuildImage.STANDARD_4_0,
@@ -98,7 +79,6 @@ export class PipelineStack extends cdk.Stack {
 
     const pipeline = new codepipeline.Pipeline(this, 'Pipeline', {
       pipelineName: `${env}-${project}-pipeline`,
-      role: pipelineRole,
       artifactBucket: bucket,
     });
 
@@ -125,7 +105,6 @@ export class PipelineStack extends cdk.Stack {
       stackName: `${env}-${project}-stack`,
       changeSetName: `${env}-${project}-stack-changeset`,
       templatePath: buildArtifact.atPath('packaged.yaml'),
-      deploymentRole: deployRole,
       adminPermissions: true,
       parameterOverrides: {
         'ENV': env,
