@@ -1,17 +1,14 @@
 import * as cdk from 'aws-cdk-lib';
-import { Template, Match } from 'aws-cdk-lib/assertions';
-import * as ServerlessApp from '../lib/serverless-app-stack';
+import { Template } from 'aws-cdk-lib/assertions';
+import * as ServerlessApp from '../lib/stack/serverless-app-stack';
 
-test('SQS Queue and SNS Topic Created', () => {
+test('DynamoDB Created', () => {
   const app = new cdk.App();
-  // WHEN
   const stack = new ServerlessApp.ServerlessAppStack(app, 'MyTestStack');
-  // THEN
 
   const template = Template.fromStack(stack);
 
-  template.hasResourceProperties('AWS::SQS::Queue', {
-    VisibilityTimeout: 300
+  template.hasResourceProperties('AWS::DynamoDB::Table', {
+    BillingMode: 'PAY_PER_REQUEST',
   });
-  template.resourceCountIs('AWS::SNS::Topic', 1);
 });
