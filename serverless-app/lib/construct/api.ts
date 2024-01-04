@@ -7,11 +7,11 @@ export interface ApiProps {
 }
 
 export class Api extends Construct {
-  public readonly restApi: apigateway.RestApi;
+  public readonly movieApi: apigateway.RestApi;
   constructor(scope: Construct, id: string, props: ApiProps) {
     super(scope, id);
 
-    const restApi = new apigateway.RestApi(this, 'Api', {
+    const movieApi = new apigateway.RestApi(this, 'MovieApi', {
       restApiName: 'movie-api',
       deployOptions: {
         stageName: props.stageName,
@@ -23,9 +23,9 @@ export class Api extends Construct {
       },
     });
 
-    const anyResource = restApi.root.addResource('{proxy+}');
+    const anyResource = movieApi.root.addResource('{proxy+}');
     anyResource.addMethod('ANY', new apigateway.LambdaIntegration(props.lambda));
 
-    this.restApi = restApi;
+    this.movieApi = movieApi;
   }
 }

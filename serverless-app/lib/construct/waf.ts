@@ -2,27 +2,26 @@ import { aws_wafv2 as waf } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export interface WafProps {
-  scope: string;
   ipAddresses: string[];
   defaultAction: waf.CfnWebACL.DefaultActionProperty;
 }
 
 export class Waf extends Construct {
-  public readonly webAcl: waf.CfnWebACL;
+  public readonly movieAcl: waf.CfnWebACL;
   constructor(scope: Construct, id: string, props: WafProps) {
     super(scope, id);
 
     const ipSet = new waf.CfnIPSet(this, 'IPSet', {
       name: 'allow-list',
       ipAddressVersion: 'IPV4',
-      scope: props.scope,
+      scope: 'REGIONAL',
       addresses: props.ipAddresses,
     });
 
-    const webAcl = new waf.CfnWebACL(this, 'WebACL', {
-      name: 'web-acl',
+    const movieAcl = new waf.CfnWebACL(this, 'MovieWebACL', {
+      name: 'movie-web-acl',
       defaultAction: props.defaultAction,
-      scope: props.scope,
+      scope: 'REGIONAL',
       visibilityConfig: {
         cloudWatchMetricsEnabled: true,
         metricName: 'web-acl',
@@ -49,6 +48,6 @@ export class Waf extends Construct {
       ],
     });
 
-    this.webAcl = webAcl;
+    this.movieAcl = movieAcl;
   }
 }

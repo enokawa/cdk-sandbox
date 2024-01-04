@@ -2,11 +2,11 @@ import { aws_dynamodb as dynamodb, RemovalPolicy } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export class Datastore extends Construct {
-  public readonly table: dynamodb.Table;
+  public readonly movieTable: dynamodb.Table;
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const table = new dynamodb.Table(this, 'MovieTable', {
+    const movieTable = new dynamodb.Table(this, 'MovieTable', {
       tableName: 'movie',
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       partitionKey: { name: 'title', type: dynamodb.AttributeType.STRING },
@@ -15,6 +15,6 @@ export class Datastore extends Construct {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
-    this.table = table;
+    this.movieTable = movieTable;
   }
 }

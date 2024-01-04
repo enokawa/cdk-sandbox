@@ -6,17 +6,18 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-export interface ApiFunctionProps {
+export interface LambdaProps {
   table: dynamodb.ITable;
 }
 
-export class ApiFunction extends Construct {
+export class Lambda extends Construct {
   public readonly apiFunction: lambda.Function;
 
-  constructor(scope: Construct, id: string, props: ApiFunctionProps) {
+  constructor(scope: Construct, id: string, props: LambdaProps) {
     super(scope, id);
 
-    const apiFunction = new lambda.DockerImageFunction(this, 'ApiFunction', {
+    const apiFunction = new lambda.DockerImageFunction(this, 'MovieApiFunction', {
+      functionName: 'movie-api-function',
       code: lambda.DockerImageCode.fromImageAsset('src'),
       memorySize: 256,
       timeout: Duration.seconds(10),
