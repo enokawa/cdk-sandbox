@@ -31,6 +31,9 @@ export class LocustStack extends cdk.Stack {
       serviceName: 'master',
       loadBalancerName: 'locust',
       memoryLimitMiB: 512,
+      cloudMapOptions: {
+        name: 'master'
+      },
       cpu: 256,
       runtimePlatform: {
         cpuArchitecture: ecs.CpuArchitecture.ARM64
