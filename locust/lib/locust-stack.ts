@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { aws_ec2 as ec2, aws_ecs as ecs } from 'aws-cdk-lib';
+import { aws_ec2 as ec2, aws_ecs as ecs, aws_ecs_patterns as ecsp } from 'aws-cdk-lib';
 import { DockerImageAsset, Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import path = require('path');
 
@@ -18,23 +18,34 @@ export class LocustStack extends cdk.Stack {
       platform: Platform.LINUX_ARM64
     });
 
-    const cluster = new ecs.Cluster(this, 'ECSCluster', { vpc });
-
-    const taskDefinition = new ecs.TaskDefinition(this, 'TD', {
-      compatibility: ecs.Compatibility.FARGATE,
-      cpu: '256',
-      memoryMiB: '512'
+    const cluster = new ecs.Cluster(this, 'ECSCluster', {
+      vpc,
+      clusterName: 'locust'
     });
 
-    taskDefinition.addContainer('TheContainer', {
-      image: ecs.ContainerImage.fromDockerImageAsset(asset),
-      portMappings: [
-        {
-          containerPort: 8089
-        }
-      ]
+    const loadBalancedFargateService = new ecsp.ApplicationLoadBalancedFargateService(this, 'Master', {
+      cluster,
+      serviceName: 'master',
+      loadBalancerName: 'locust',
+      memoryLimitMiB: 512,
+      cpu: 256,
+      runtimePlatform: {
+        cpuArchitecture: ecs.CpuArchitecture.ARM64
+      },
+      taskImageOptions: {
+        image: ecs.ContainerImage.fromDockerImageAsset(asset),
+        family: 'master',
+        containerName: 'master',
+        containerPort: 8089,
+        enableLogging: true,
+        environment: {
+          TEST_ENVIRONMENT_VARIABLE1: 'test environment variable 1 value',
+        },
+        command: ['--master']
+      },
+      desiredCount: 1,
     });
 
-    // TODO: Add ECS Service
+    // TODO: Add Worker service
   }
 }
