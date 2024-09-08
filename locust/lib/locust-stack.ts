@@ -20,7 +20,10 @@ export class LocustStack extends cdk.Stack {
 
     const cluster = new ecs.Cluster(this, 'ECSCluster', {
       vpc,
-      clusterName: 'locust'
+      clusterName: 'locust',
+      defaultCloudMapNamespace: {
+        name: 'internal'
+      }
     });
 
     const loadBalancedFargateService = new ecsp.ApplicationLoadBalancedFargateService(this, 'Master', {
